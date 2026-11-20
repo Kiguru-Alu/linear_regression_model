@@ -1,4 +1,4 @@
-# shamba_risk
+# hectare_africa
 
 A new Flutter project.
 

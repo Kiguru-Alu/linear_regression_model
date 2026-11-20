@@ -1,4 +1,4 @@
-package com.kiguru.shamba_risk
+package com.kiguru.hectare_africa
 
 import io.flutter.embedding.android.FlutterActivity
 

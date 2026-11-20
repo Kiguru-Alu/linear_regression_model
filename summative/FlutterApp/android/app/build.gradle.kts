@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kiguru.shamba_risk"
+    namespace = "com.kiguru.hectare_africa"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.kiguru.shamba_risk"
+        applicationId = "com.kiguru.hectare_africa"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

@@ -43,4 +43,18 @@ YouTube: to be added after recording.
 
 ## How to run the mobile app
 
-To be added with the Flutter app.
+The app, Hectare Africa, is a one-page Flutter app in `summative/FlutterApp`. It sends a field's 11 inputs to the live API's `/predict` route and shows the expected maize yield and risk band, or a readable error in the same place.
+
+1. Install [Flutter](https://docs.flutter.dev/get-started/install) 3.47 or newer, and check it with `flutter doctor`.
+2. Connect an Android phone with USB debugging turned on, or start an Android or iOS emulator. Check that `flutter devices` lists it.
+3. Run the app:
+
+   ```sh
+   cd summative/FlutterApp
+   flutter pub get
+   flutter run
+   ```
+
+4. Tap **Fill in an example field**, then **Predict**. The first request can take up to a minute while the free Render service wakes up.
+
+To run the app's tests: `flutter test` in the same folder.

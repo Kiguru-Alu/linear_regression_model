@@ -1,12 +1,16 @@
+import ctypes
+import gc
 import json
+import threading
+from io import BytesIO
 from pathlib import Path
 from typing import Literal
 
 import joblib
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 import retrain
 
@@ -43,9 +47,24 @@ class FarmInput(BaseModel):
     seed_type: SeedType = Field(description="Seed planted")
 
 
+class FarmRecord(FarmInput):
+    yield_kg_ha: float = Field(ge=0, le=15000, description="Measured maize yield in kg per hectare")
+
+
 class Prediction(BaseModel):
     predicted_yield_kg_ha: float
     risk_band: Literal["high", "medium", "low"]
+
+
+class RetrainResult(BaseModel):
+    retrained: bool
+    rows_received: int
+    rows_already_in_training_data: int
+    rows_added: int
+    training_rows: int
+    test_mse_before: float
+    test_mse_after: float
+    risk_bands: dict[str, float]
 
 
 def load_model(path=MODEL_PATH):
@@ -55,6 +74,15 @@ def load_model(path=MODEL_PATH):
 # Same as predict_yield in the notebook, but the model is passed in so it is loaded once, at startup.
 def predict_yield(row, model):
     return float(model.predict(row[retrain.FEATURES])[0])
+
+
+def release_memory():
+    gc.collect()
+    # On Linux (Render), hand freed memory back to the system, so repeated retrains stay inside the free plan's 512 MB
+    try:
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except OSError:
+        pass
 
 
 def risk_band(predicted_yield, bands):
@@ -68,7 +96,10 @@ def risk_band(predicted_yield, bands):
 state = {
     "model": load_model(),
     "risk_bands": json.loads(RISK_BANDS_PATH.read_text()),
+    "train_data": retrain.load_data(retrain.TRAIN_PATH),
+    "test_data": retrain.load_data(retrain.TEST_PATH),
 }
+retrain_lock = threading.Lock()
 
 app = FastAPI(
     title="Kenya Maize Farm Risk API",
@@ -97,3 +128,75 @@ def predict(farm: FarmInput):
     row = pd.DataFrame([farm.model_dump()])
     predicted = predict_yield(row, state["model"])
     return Prediction(predicted_yield_kg_ha=round(predicted, 1), risk_band=risk_band(predicted, state["risk_bands"]))
+
+
+def read_new_data(content):
+    try:
+        data = pd.read_csv(BytesIO(content))
+    except Exception as error:
+        raise HTTPException(status_code=422, detail="The file could not be read as a CSV.") from error
+
+    expected = retrain.FEATURES + [retrain.TARGET]
+    missing = [column for column in expected if column not in data.columns]
+    unexpected = [column for column in data.columns if column not in expected]
+    if missing or unexpected:
+        raise HTTPException(status_code=422, detail={
+            "message": "The CSV must have exactly the training data's columns.",
+            "missing_columns": missing, "unexpected_columns": unexpected, "expected_columns": expected,
+        })
+    if data.empty:
+        raise HTTPException(status_code=422, detail="The CSV has no data rows.")
+
+    problems = []
+    # CSV line numbers: line 1 is the header
+    for line, record in enumerate(data[expected].to_dict("records"), start=2):
+        blanks = [column for column, value in record.items() if pd.isna(value)]
+        if blanks:
+            problems.append({"line": line, "error": f"Missing values in: {', '.join(blanks)}"})
+            continue
+        try:
+            FarmRecord.model_validate(record, strict=False)
+        except ValidationError as error:
+            problems.append({"line": line, "error": "; ".join(
+                f"{issue['loc'][0]}: {issue['msg']}" for issue in error.errors())})
+    if problems:
+        raise HTTPException(status_code=422, detail={
+            "message": f"{len(problems)} row(s) failed validation. Nothing was retrained.",
+            "rows": problems[:10],
+        })
+    return data[expected]
+
+
+@app.post("/retrain", response_model=RetrainResult)
+def retrain_model(file: UploadFile = File(description="CSV with the same columns as the training data")):
+    uploaded = read_new_data(file.file.read())
+
+    with retrain_lock:
+        new_rows = retrain.drop_known_rows(uploaded, state["train_data"])
+        if new_rows.empty:
+            mse_now = round(retrain.test_mse(state["model"], state["test_data"]), 1)
+            return RetrainResult(
+                retrained=False, rows_received=len(uploaded), rows_already_in_training_data=len(uploaded),
+                rows_added=0, training_rows=len(state["train_data"]), test_mse_before=mse_now,
+                test_mse_after=mse_now, risk_bands=state["risk_bands"],
+            )
+
+        result = retrain.retrain(state["model"], state["train_data"], new_rows, state["test_data"])
+        state["model"] = result["model"]
+        state["train_data"] = result["train_data"]
+        if result["risk_bands"] is not None:
+            state["risk_bands"] = result["risk_bands"]
+        mse_before, mse_after = result["test_mse_before"], result["test_mse_after"]
+        del result
+        release_memory()
+
+    return RetrainResult(
+        retrained=True,
+        rows_received=len(uploaded),
+        rows_already_in_training_data=len(uploaded) - len(new_rows),
+        rows_added=len(new_rows),
+        training_rows=len(state["train_data"]),
+        test_mse_before=round(mse_before, 1),
+        test_mse_after=round(mse_after, 1),
+        risk_bands=state["risk_bands"],
+    )

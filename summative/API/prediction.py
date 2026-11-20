@@ -5,6 +5,7 @@ from typing import Literal
 import joblib
 import pandas as pd
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
 import retrain
@@ -75,6 +76,21 @@ app = FastAPI(
                 "and turns it into a high, medium or low risk band.",
     version="1.0.0",
 )
+
+# CORS only controls which websites may call this API from a browser. The Flutter app on a phone is not a
+# browser, so CORS does not affect it.
+# Allowed: our own Render site, and the Flutter web debug server on http://localhost:8080.
+# Restricted: every other website; any method except GET and POST, the only ones the API uses; any header
+# except Content-Type and Accept; and credentials (cookies and auth headers), because the API has no login
+# and should never receive them.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://kenya-maize-risk-api.onrender.com", "http://localhost:8080"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Accept"],
+    allow_credentials=False,
+)
+
 
 @app.post("/predict", response_model=Prediction)
 def predict(farm: FarmInput):

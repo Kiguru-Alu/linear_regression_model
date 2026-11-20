@@ -19,6 +19,22 @@ Source: Aramburu Merlos, F., Tenorio, F. A., Mashingaidze, N., Sananka, A., Asto
 
 Swagger UI: to be added after deployment.
 
+| Route | Method | What it does |
+|---|---|---|
+| `/predict` | POST | Takes a field's 11 inputs and returns its expected maize yield (kg/ha) and a high, medium or low risk band. Wrong types, missing values and out-of-range values return a validation error. |
+| `/retrain` | POST | Takes a CSV with the same columns as `summative/API/train_data.csv`, refits the model on the original data plus the new rows, and starts using it straight away. `summative/API/new_data_uganda_2020.csv` is a sample file to try it with. |
+| `/docs` | GET | Swagger UI. |
+
+To run it locally (needs [uv](https://docs.astral.sh/uv/)):
+
+```sh
+cd summative/API
+uv sync
+uv run uvicorn prediction:app --reload
+```
+
+Then open http://127.0.0.1:8000/docs.
+
 ## Video demo
 
 YouTube: to be added after recording.

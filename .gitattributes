@@ -1,0 +1,2 @@
+# Keep data files byte-for-byte as published (no line-ending conversion)
+*.csv -text -whitespace

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Literal
 
 import joblib
+import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -74,3 +75,9 @@ app = FastAPI(
                 "and turns it into a high, medium or low risk band.",
     version="1.0.0",
 )
+
+@app.post("/predict", response_model=Prediction)
+def predict(farm: FarmInput):
+    row = pd.DataFrame([farm.model_dump()])
+    predicted = predict_yield(row, state["model"])
+    return Prediction(predicted_yield_kg_ha=round(predicted, 1), risk_band=risk_band(predicted, state["risk_bands"]))

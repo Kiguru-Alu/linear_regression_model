@@ -17,7 +17,9 @@ Source: Aramburu Merlos, F., Tenorio, F. A., Mashingaidze, N., Sananka, A., Asto
 
 ## API
 
-Swagger UI: to be added after deployment.
+Swagger UI: https://kenya-maize-risk-api.onrender.com/docs
+
+The service runs on Render's free plan, so after 15 minutes without traffic it sleeps and can take up to a minute to wake up on the first request.
 
 | Route | Method | What it does |
 |---|---|---|

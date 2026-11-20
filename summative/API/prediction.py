@@ -10,6 +10,7 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 import retrain
@@ -121,6 +122,12 @@ app.add_middleware(
     allow_headers=["Content-Type", "Accept"],
     allow_credentials=False,
 )
+
+
+# The bare service URL has no page of its own, so send visitors to Swagger UI
+@app.get("/", include_in_schema=False)
+def home():
+    return RedirectResponse(url="/docs")
 
 
 @app.post("/predict", response_model=Prediction)

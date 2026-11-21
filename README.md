@@ -64,6 +64,6 @@ The app, Hectare Africa, is a one-page Flutter app in `summative/FlutterApp`. It
 To run the app's tests: `flutter test` in the same folder.
 
 <p>
-  <img src="summative/FlutterApp/screenshots/form.png" width="260" alt="Hectare Africa: the form with an example field filled in">
-  <img src="summative/FlutterApp/screenshots/result.png" width="260" alt="Hectare Africa: a predicted yield and risk band from the live API">
+  <img src="summative/FlutterApp/screenshots/form.jpeg" width="260" alt="Hectare Africa: the form with an example field filled in">
+  <img src="summative/FlutterApp/screenshots/result.jpeg" width="260" alt="Hectare Africa: a predicted yield and risk band from the live API">
 </p>

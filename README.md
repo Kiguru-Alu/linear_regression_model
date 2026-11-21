@@ -1,4 +1,4 @@
-# Kenya Maize Farm Risk Score
+# Hectare Africa: Kenya maize farm risk score
 
 ## Mission and problem
 

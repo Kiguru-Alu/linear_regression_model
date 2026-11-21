@@ -103,7 +103,7 @@ state = {
 retrain_lock = threading.Lock()
 
 app = FastAPI(
-    title="Kenya Maize Farm Risk API",
+    title="Hectare Africa API",
     description="Predicts a Kenyan smallholder maize field's yield (kg/ha) from what an insurer knows at enrolment, "
                 "and turns it into a high, medium or low risk band.",
     version="1.0.0",

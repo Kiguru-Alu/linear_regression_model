@@ -1,10 +1,14 @@
 # Hectare Africa: Kenya maize farm risk score
 
-## Mission and problem
+## About me
 
-My mission is to build Africa's capacity to make things, by starting and running technology companies on the continent.
-This project builds one piece of that: digital infrastructure for farm insurance, because most smallholder maize farmers in Kenya farm uninsured, and one bad season can wipe them out and lock them out of credit.
-It helps agricultural insurers judge each farm's risk at enrolment, so these farmers become insurable.
+Brian Mahui.
+My personal mission is to build Africa's capacity to make things, by starting and running technology companies on the continent.
+
+## Model mission and problem
+
+Most smallholder maize farmers in Kenya farm uninsured, so one bad season can wipe them out and keep them locked out of credit.
+My mission is to make them insurable by helping agricultural insurers judge each farm's risk at enrolment.
 The app predicts a field's expected maize yield from its location, soil and planned inputs, and turns it into a low, medium or high risk band.
 
 ## Dataset

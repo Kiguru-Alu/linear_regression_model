@@ -62,3 +62,8 @@ The app, Hectare Africa, is a one-page Flutter app in `summative/FlutterApp`. It
 4. Tap **Fill in an example field**, then **Predict**. The first request can take up to a minute while the free Render service wakes up.
 
 To run the app's tests: `flutter test` in the same folder.
+
+<p>
+  <img src="summative/FlutterApp/screenshots/form.png" width="260" alt="Hectare Africa: the form with an example field filled in">
+  <img src="summative/FlutterApp/screenshots/result.png" width="260" alt="Hectare Africa: a predicted yield and risk band from the live API">
+</p>

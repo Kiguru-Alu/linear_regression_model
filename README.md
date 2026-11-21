@@ -28,7 +28,7 @@ The service runs on Render's free plan, so after 15 minutes without traffic it s
 | Route | Method | What it does |
 |---|---|---|
 | `/predict` | POST | Takes a field's 11 inputs and returns its expected maize yield (kg/ha) and a high, medium or low risk band. Wrong types, missing values and out-of-range values return a validation error. |
-| `/retrain` | POST | Takes a CSV with the same columns as `summative/API/train_data.csv`, refits the model on the original data plus the new rows, and starts using it straight away. `summative/API/new_data_uganda_2020.csv` is a sample file to try it with. |
+| `/retrain` | POST | Takes a CSV with the same columns as `summative/API/train_data.csv`, refits the model on the original data plus the new rows, and starts using it straight away. The retrained model is kept in memory, so when the service restarts (after sleeping or on a redeploy) it goes back to the saved model. `summative/API/new_data_uganda_2020.csv` is a sample file to try it with. |
 | `/docs` | GET | Swagger UI. |
 
 To run it locally (needs [uv](https://docs.astral.sh/uv/)):

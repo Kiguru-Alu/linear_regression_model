@@ -176,6 +176,11 @@ def read_new_data(content):
 
 @app.post("/retrain", response_model=RetrainResult)
 def retrain_model(file: UploadFile = File(description="CSV with the same columns as the training data")):
+    """Refit the model on the training data plus the uploaded rows, and use it for /predict straight away.
+
+    The retrained model is kept in memory only. When the service restarts (after sleeping or on a redeploy),
+    it goes back to the saved model.
+    """
     uploaded = read_new_data(file.file.read())
 
     with retrain_lock:

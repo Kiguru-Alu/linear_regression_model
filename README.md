@@ -43,7 +43,7 @@ Then open http://127.0.0.1:8000/docs.
 
 ## Video demo
 
-YouTube: to be added after recording.
+YouTube: https://youtu.be/tuA5stYziY4
 
 ## How to run the mobile app
 
